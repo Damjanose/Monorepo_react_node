@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import type { Category, Product } from "@template/types"
+import type { Category, Product } from "@jewellery/types"
 import { apiClient } from "../api/client"
 
 export const useCategories = () =>

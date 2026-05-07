@@ -1,6 +1,8 @@
 node_modules
 .env
 .env.*
+!.env.example
+!.env.development
 dist
 coverage
 pnpm-lock.yaml

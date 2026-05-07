@@ -1,4 +1,4 @@
-import type { PermissionName } from "@template/types"
+import type { PermissionName } from "@jewellery/types"
 
 declare global {
   namespace Express {

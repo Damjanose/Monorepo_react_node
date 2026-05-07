@@ -8,7 +8,15 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is required")
 }
 
-const permissions = ["admin", "product.read", "product.write", "category.read", "category.write"]
+const permissions = [
+  "admin",
+  "product.read",
+  "product.write",
+  "category.read",
+  "category.write",
+  "order.read",
+  "order.write",
+]
 
 const seed = async () => {
   const client = new pg.Client({ connectionString })
@@ -23,13 +31,13 @@ const seed = async () => {
       ])
     }
 
-    const passwordHash = await bcrypt.hash("n", 10)
+    const passwordHash = await bcrypt.hash("Admin123!", 10)
     const userResult = await client.query(
       `
       INSERT INTO users(email, password_hash)
       VALUES($1, $2)
       ON CONFLICT (email)
-      DO UPDATE SET updated_at = NOW()
+      DO UPDATE SET password_hash = EXCLUDED.password_hash, updated_at = NOW()
       RETURNING id
       `,
       ["admin@example.com", passwordHash],
@@ -44,7 +52,7 @@ const seed = async () => {
       ON CONFLICT (user_id)
       DO UPDATE SET full_name = EXCLUDED.full_name, updated_at = NOW()
       `,
-      [userId, "Template Admin"],
+      [userId, "Jewellery Admin"],
     )
 
     await client.query(
@@ -57,35 +65,110 @@ const seed = async () => {
       [userId],
     )
 
-    const catRes = await client.query(
+    await client.query(
       `
       INSERT INTO categories(name, description)
       VALUES
-        ('Electronics', 'Devices and gadgets'),
-        ('Books', 'Physical and digital books')
+        ('Rings', 'Gold and silver rings'),
+        ('Necklaces', 'Chains and pendants'),
+        ('Watches', 'Luxury timepieces')
       ON CONFLICT (name) DO UPDATE SET description = EXCLUDED.description, updated_at = NOW()
-      RETURNING id, name
       `,
     )
 
-    const electronicsId =
-      catRes.rows.find((row) => row.name === "Electronics")?.id ??
-      (await client.query("SELECT id FROM categories WHERE name = 'Electronics' LIMIT 1")).rows[0].id
+    const ringsRes = await client.query("SELECT id FROM categories WHERE name = 'Rings' LIMIT 1")
+    const neckRes = await client.query("SELECT id FROM categories WHERE name = 'Necklaces' LIMIT 1")
+    const watchRes = await client.query("SELECT id FROM categories WHERE name = 'Watches' LIMIT 1")
+    const ringsId = ringsRes.rows[0].id
+    const neckId = neckRes.rows[0].id
+    const watchId = watchRes.rows[0].id
 
-    const booksId =
-      catRes.rows.find((row) => row.name === "Books")?.id ??
-      (await client.query("SELECT id FROM categories WHERE name = 'Books' LIMIT 1")).rows[0].id
+    const products = [
+      {
+        cid: ringsId,
+        name: "Vintage Gold Band",
+        desc: "14k gold, limited run",
+        price: "449.00",
+        stock: 12,
+        badge: "new",
+        featured: true,
+        url: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600",
+      },
+      {
+        cid: ringsId,
+        name: "Silver Signet",
+        desc: "Sterling silver",
+        price: "189.00",
+        stock: 3,
+        badge: "low_stock",
+        featured: true,
+        url: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600",
+      },
+      {
+        cid: neckId,
+        name: "Pearl Strand",
+        desc: "Freshwater pearls",
+        price: "320.00",
+        stock: 8,
+        badge: "none",
+        featured: false,
+        url: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600",
+      },
+      {
+        cid: watchId,
+        name: "Minimal Steel Watch",
+        desc: "Swiss movement",
+        price: "899.00",
+        stock: 0,
+        badge: "sold_out",
+        featured: true,
+        url: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=600",
+      },
+    ]
 
-    await client.query(
-      `
-      INSERT INTO products(category_id, name, description, price, is_active)
-      VALUES
-        ($1, 'Wireless Headphones', 'Noise-cancelling headphones', 159.99, true),
-        ($2, 'TypeScript Guide', 'Learn TypeScript with examples', 39.00, true)
-      ON CONFLICT DO NOTHING
-      `,
-      [electronicsId, booksId],
-    )
+    for (const p of products) {
+      const existing = await client.query("SELECT id FROM products WHERE name = $1 LIMIT 1", [p.name])
+      let productId: string
+      if (existing.rows.length > 0) {
+        productId = existing.rows[0].id as string
+        await client.query(
+          `
+          UPDATE products SET
+            category_id = $2,
+            description = $3,
+            price = $4::numeric,
+            stock_quantity = $5,
+            urgency_badge = $6,
+            featured = $7,
+            is_active = true,
+            updated_at = NOW()
+          WHERE id = $1
+          `,
+          [productId, p.cid, p.desc, p.price, p.stock, p.badge, p.featured],
+        )
+      } else {
+        const ins = await client.query(
+          `
+          INSERT INTO products(category_id, name, description, price, is_active, stock_quantity, urgency_badge, featured, published_at)
+          VALUES ($1, $2, $3, $4::numeric, true, $5, $6, $7, NOW())
+          RETURNING id
+          `,
+          [p.cid, p.name, p.desc, p.price, p.stock, p.badge, p.featured],
+        )
+        productId = ins.rows[0].id as string
+      }
+
+      const imgCount = await client.query(
+        "SELECT COUNT(*)::int AS c FROM product_images WHERE product_id = $1",
+        [productId],
+      )
+      if (Number(imgCount.rows[0].c) === 0) {
+        await client.query(
+          `INSERT INTO product_images(product_id, url, sort_order) VALUES ($1, $2, 0)`,
+          [productId, p.url],
+        )
+      }
+    }
 
     await client.query("COMMIT")
     console.log("Seed completed")

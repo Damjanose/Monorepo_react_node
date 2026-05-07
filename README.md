@@ -1,133 +1,96 @@
-# Monorepo_react_node
+# Jewellery e-commerce (full stack)
 
-A fullstack template with:
-- Express + TypeScript API
-- React + TypeScript frontend (Vite)
-- Postgres schema for users, permissions, sessions, categories, and products
+Monorepo: **React (Vite) client**, **Express + TypeScript API**, **PostgreSQL** (Docker or local), with **Socket.IO** for order/notification hints.
 
-## First-Time Setup
-
-### 1) Prerequisites
+## Prerequisites
 
 - Node.js 20+
 - pnpm 10+
 - Docker Desktop (recommended) or local Postgres
 
-### 2) Install dependencies
+## First-time setup
+
+### 1) Install
 
 ```bash
 pnpm install
 ```
 
-### 3) Configure environment
+### 2) Environment
 
-Create both env files:
+Copy [.env.example](.env.example) to `apps/api/.env` and set at minimum:
+
+- `DATABASE_URL`
+- `JWT_ACCESS_SECRET`
+- `JWT_REFRESH_SECRET`
+
+Optional: `apps/client/.env.development` (see [.env.example](.env.example) for `VITE_*` defaults).
+
+### 3) Database
+
+**Docker (recommended)**
 
 ```bash
-cp .env.example .env
-cp .env.example apps/api/.env
+docker compose up -d
 ```
 
-### 4) Configure database
-
-Use one of the following options.
-
-#### Option A: Docker Postgres (recommended)
-
-```bash
-docker-compose up -d
-```
-
-Use this in both `.env` and `apps/api/.env`:
+Use in `apps/api/.env`:
 
 ```env
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/template_auth_catalog
+DATABASE_URL=postgres://postgres:postgres@localhost:5433/template_auth_catalog
 ```
 
-#### Option B: Local Postgres
+**Local Postgres** — create DB `template_auth_catalog` and point `DATABASE_URL` at your role.
 
-If your local Postgres does not have the `postgres` role, use your local role in `DATABASE_URL`.
-
-Example:
-
-```env
-DATABASE_URL=postgres://<your_local_role>@localhost:5432/template_auth_catalog
-```
-
-Create the database if needed:
+### 4) Migrate & seed
 
 ```bash
-createdb template_auth_catalog
+pnpm --filter @jewellery/api db:migrate
+pnpm --filter @jewellery/api db:seed
 ```
 
-### 5) Run migration and seed
-
-```bash
-pnpm --filter @template/api db:migrate
-pnpm --filter @template/api db:seed
-```
-
-Expected output includes:
-- `Applied migration: 001_init.sql`
-- `Seed completed`
-
-### 6) Start apps
+### 5) Development
 
 ```bash
 pnpm dev
 ```
 
-- API: `http://localhost:3001`
+- API + Socket.IO: `http://localhost:3001`
 - Client: `http://localhost:5173`
 
-### 7) Quick API checks
-
-Register:
-
-```bash
-curl -sS 'http://localhost:3001/auth/register' \
-  -H 'Content-Type: application/json' \
-  --data-raw '{"fullName":"asd","email":"asd@asd.asd","password":"Asd123!!"}'
-```
-
-Login:
-
-```bash
-curl -sS 'http://localhost:3001/auth/login' \
-  -H 'Content-Type: application/json' \
-  --data-raw '{"email":"asd@asd.asd","password":"Asd123!!"}'
-```
-
-## Troubleshooting
-
-- `role "postgres" does not exist`
-  - Your `DATABASE_URL` is using a DB role that does not exist in the running Postgres instance.
-  - Either run Docker Postgres (`postgres:postgres`) or change `DATABASE_URL` to your local role.
-
-- `database "template_auth_catalog" does not exist`
-  - Create it with `createdb template_auth_catalog`.
-
-- Env changes not applied
-  - Restart `pnpm dev` after editing `.env` files.
-
-## Default Admin
+## Default admin
 
 - Email: `admin@example.com`
 - Password: `Admin123!`
 
-## API Routes
+## Features
 
-- `POST /auth/register`
-- `POST /auth/login`
-- `POST /auth/refresh`
-- `POST /auth/logout`
-- `GET /auth/me`
-- `GET /categories`
-- `GET /categories/:id`
-- `GET /categories/:id/products`
-- `GET /products`
-- `GET /products/:id`
+- Public **catalogue** (categories, products, featured filter, product images, urgency badges, stock).
+- **Cart** and **checkout** (MVP: simulated payment choice + shipping text).
+- **Orders** with status timeline and staff transitions (`order.write` or `admin`).
+- **Notifications** persisted + pushed over **Socket.IO** (`order:created`, `order:status_updated`, `notification:new`).
+- **Admin** UI for products and orders (staff permissions).
 
-Write routes require permissions:
-- `POST/PATCH/DELETE /categories` -> `category.write`
-- `POST/PATCH/DELETE /products` -> `product.write`
+## API & realtime contract
+
+See [docs/backend-contract.md](docs/backend-contract.md).
+
+## QA
+
+See [docs/qa-checklist.md](docs/qa-checklist.md).
+
+## Troubleshooting
+
+- **Docker not running** — start Docker Desktop before `docker compose up -d`.
+- **`role "postgres" does not exist`** — use Docker Postgres or adjust `DATABASE_URL` to your local role.
+- **JWT errors** — ensure `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` are set in `apps/api/.env`.
+- **CORS / API URL** — set `VITE_API_URL` to the API origin if not using localhost:3001.
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `apps/client` | Vite + React storefront & admin UI |
+| `apps/api` | Express API + Socket.IO |
+| `packages/types` | Shared TypeScript types |
+| `db` | SQL migrations + seed script |

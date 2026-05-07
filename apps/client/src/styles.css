@@ -12,6 +12,10 @@ body {
   min-height: 100vh;
 }
 
+.object-fit-cover {
+  object-fit: cover;
+}
+
 .navbar-brand {
   letter-spacing: 0.2px;
 }

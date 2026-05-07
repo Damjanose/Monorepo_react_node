@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
-import type { Product } from "@template/types"
+import type { Product } from "@jewellery/types"
 import { useParams } from "react-router-dom"
+import { ProductCard } from "../components/product/ProductCard"
 import { apiClient } from "../api/client"
 
 export const CategoryProductsPage = () => {
@@ -8,28 +9,24 @@ export const CategoryProductsPage = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["categoryProducts", categoryId],
     queryFn: async () => {
-      const { data } = await apiClient.get<Product[]>(`/categories/${categoryId}/products`)
-      return data
+      const { data: d } = await apiClient.get<Product[]>(`/categories/${categoryId}/products`)
+      return d
     },
     enabled: !!categoryId,
   })
 
-  if (isLoading) return <div className="alert alert-info">Loading products...</div>
+  if (isLoading) return <div className="alert alert-info">Loading products…</div>
   if (isError) return <div className="alert alert-danger">Could not load category products</div>
 
   return (
-    <div className="card border-0 shadow-sm">
-      <div className="card-body p-4">
-        <h1 className="h3 fw-bold mb-3">Products in Category</h1>
-        <p className="text-secondary mb-4">Filtered products for category ID: {categoryId}</p>
-        <div className="list-group">
-          {data?.map((product) => (
-            <div key={product.id} className="list-group-item d-flex justify-content-between align-items-center">
-              <span>{product.name}</span>
-              <span className="badge text-bg-light border">ID #{product.id}</span>
-            </div>
-          ))}
-        </div>
+    <div>
+      <h1 className="h3 fw-bold mb-3">Category products</h1>
+      <div className="row g-3">
+        {data?.map((product) => (
+          <div key={product.id} className="col-6 col-lg-4 col-xl-3">
+            <ProductCard product={product} />
+          </div>
+        ))}
       </div>
     </div>
   )

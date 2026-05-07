@@ -2,11 +2,18 @@ import type { Request, Response } from "express"
 import { z } from "zod"
 import * as products from "../lib/products.js"
 
+const urgency = z.enum(["new", "low_stock", "sold_out", "none"])
+
 const createSchema = z.object({
   categoryId: z.string().uuid(),
   name: z.string().min(1),
   description: z.string().optional(),
   price: z.string().min(1),
+  stockQuantity: z.number().int().min(0).optional(),
+  lowStockThreshold: z.number().int().min(0).optional(),
+  urgencyBadge: urgency.optional(),
+  featured: z.boolean().optional(),
+  imageUrls: z.array(z.string().min(1)).optional(),
 })
 
 const updateSchema = z.object({
@@ -15,10 +22,20 @@ const updateSchema = z.object({
   description: z.string().optional(),
   price: z.string().min(1).optional(),
   isActive: z.boolean().optional(),
+  stockQuantity: z.number().int().min(0).optional(),
+  lowStockThreshold: z.number().int().min(0).optional(),
+  urgencyBadge: urgency.optional(),
+  featured: z.boolean().optional(),
+  imageUrls: z.array(z.string().min(1)).optional(),
 })
 
-export const list = async (_req: Request, res: Response) => {
-  const data = await products.listProducts()
+export const list = async (req: Request, res: Response) => {
+  const featured = req.query.featured === "true"
+  const categoryId = typeof req.query.categoryId === "string" ? req.query.categoryId : undefined
+  const data = await products.listProducts({
+    featured: featured || undefined,
+    categoryId: categoryId && categoryId.length > 0 ? categoryId : undefined,
+  })
   return res.json(data)
 }
 

@@ -2,7 +2,7 @@ import crypto from "node:crypto"
 import bcrypt from "bcryptjs"
 import { db } from "./db.js"
 import { hashToken, refreshExpiryDate, signAccessToken, signRefreshToken, verifyRefreshToken } from "./tokens.js"
-import type { AuthResponse, PermissionName } from "@template/types"
+import type { AuthResponse, PermissionName } from "@jewellery/types"
 
 const mapUser = async (userId: string, email: string, isActive: boolean) => {
   const details = await db.selectFrom("user_details").selectAll().where("user_id", "=", userId).executeTakeFirstOrThrow()

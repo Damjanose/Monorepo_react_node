@@ -1,5 +1,5 @@
 {
-  "name": "@template/db",
+  "name": "@jewellery/db",
   "private": true,
   "type": "module",
   "dependencies": {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
-import type { AuthResponse, LoginInput, RegisterInput, User } from "@template/types"
+import type { AuthResponse, LoginInput, RegisterInput, User } from "@jewellery/types"
 import { apiClient } from "../api/client"
+import { useAuthStore } from "../stores/authStore"
 
 type AuthContextValue = {
   user: User | null
@@ -33,6 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!refreshToken) {
+      useAuthStore.getState().setSessionReady(true)
       return
     }
 
@@ -48,6 +50,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setAccessToken(null)
         setRefreshToken(null)
         localStorage.removeItem(REFRESH_KEY)
+      } finally {
+        useAuthStore.getState().setSessionReady(true)
       }
     }
 

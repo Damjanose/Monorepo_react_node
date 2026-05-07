@@ -17,12 +17,10 @@ export const createCategory = async (input: { name: string; description?: string
 }
 
 export const updateCategory = async (id: string, input: { name?: string; description?: string }) => {
-  return db
-    .updateTable("categories")
-    .set({ ...input, updated_at: new Date() })
-    .where("id", "=", id)
-    .returningAll()
-    .executeTakeFirst()
+  const patch: Record<string, unknown> = { updated_at: new Date() }
+  if (input.name !== undefined) patch.name = input.name
+  if (input.description !== undefined) patch.description = input.description
+  return db.updateTable("categories").set(patch as never).where("id", "=", id).returningAll().executeTakeFirst()
 }
 
 export const removeCategory = async (id: string) => {
