@@ -18,7 +18,7 @@ export const list = async (_req: Request, res: Response) => {
   return res.json(data.map(toCategory))
 }
 
-export const getById = async (req: Request, res: Response) => {
+export const getById = async (req: Request<{ id: string }>, res: Response) => {
   const data = await categories.getCategory(req.params.id)
   if (!data) {
     return res.status(404).json({ message: "Category not found" })
@@ -37,7 +37,7 @@ export const create = async (req: Request, res: Response) => {
   }
 }
 
-export const update = async (req: Request, res: Response) => {
+export const update = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const input = updateSchema.parse(req.body)
     const data = await categories.updateCategory(req.params.id, input)
@@ -51,7 +51,7 @@ export const update = async (req: Request, res: Response) => {
   }
 }
 
-export const remove = async (req: Request, res: Response) => {
+export const remove = async (req: Request<{ id: string }>, res: Response) => {
   const result = await categories.removeCategory(req.params.id)
   if (Number(result.numDeletedRows ?? 0) < 1) {
     return res.status(404).json({ message: "Category not found" })
