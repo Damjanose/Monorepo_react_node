@@ -28,7 +28,7 @@ export const addItem = async (req: Request, res: Response) => {
   }
 }
 
-export const patchItem = async (req: Request, res: Response) => {
+export const patchItem = async (req: Request<{ productId: string }>, res: Response) => {
   if (!req.auth) return res.status(401).json({ message: "Unauthorized" })
   try {
     const input = qtySchema.parse(req.body)
@@ -39,7 +39,7 @@ export const patchItem = async (req: Request, res: Response) => {
   }
 }
 
-export const removeItem = async (req: Request, res: Response) => {
+export const removeItem = async (req: Request<{ productId: string }>, res: Response) => {
   if (!req.auth) return res.status(401).json({ message: "Unauthorized" })
   try {
     const data = await cart.removeCartItem(req.auth.userId, req.params.productId)

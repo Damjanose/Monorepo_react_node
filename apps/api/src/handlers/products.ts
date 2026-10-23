@@ -39,7 +39,7 @@ export const list = async (req: Request, res: Response) => {
   return res.json(data)
 }
 
-export const getById = async (req: Request, res: Response) => {
+export const getById = async (req: Request<{ id: string }>, res: Response) => {
   const data = await products.getProduct(req.params.id)
   if (!data) {
     return res.status(404).json({ message: "Product not found" })
@@ -48,7 +48,7 @@ export const getById = async (req: Request, res: Response) => {
   return res.json(data)
 }
 
-export const listByCategory = async (req: Request, res: Response) => {
+export const listByCategory = async (req: Request<{ id: string }>, res: Response) => {
   const data = await products.listProductsByCategory(req.params.id)
   return res.json(data)
 }
@@ -63,7 +63,7 @@ export const create = async (req: Request, res: Response) => {
   }
 }
 
-export const update = async (req: Request, res: Response) => {
+export const update = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const input = updateSchema.parse(req.body)
     const data = await products.updateProduct(req.params.id, input)
@@ -77,7 +77,7 @@ export const update = async (req: Request, res: Response) => {
   }
 }
 
-export const remove = async (req: Request, res: Response) => {
+export const remove = async (req: Request<{ id: string }>, res: Response) => {
   const result = await products.removeProduct(req.params.id)
   if (Number(result.numDeletedRows ?? 0) < 1) {
     return res.status(404).json({ message: "Product not found" })

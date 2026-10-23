@@ -7,7 +7,7 @@ export const list = async (req: Request, res: Response) => {
   return res.json(data)
 }
 
-export const markRead = async (req: Request, res: Response) => {
+export const markRead = async (req: Request<{ id: string }>, res: Response) => {
   if (!req.auth) return res.status(401).json({ message: "Unauthorized" })
   const row = await notifications.markNotificationRead(req.auth.userId, req.params.id)
   if (!row) {

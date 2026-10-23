@@ -23,7 +23,7 @@ export const list = async (req: Request, res: Response) => {
   return res.json(data)
 }
 
-export const getById = async (req: Request, res: Response) => {
+export const getById = async (req: Request<{ id: string }>, res: Response) => {
   if (!req.auth) return res.status(401).json({ message: "Unauthorized" })
   const detail = await orders.getOrderDetail(req.params.id, req.auth.userId, isStaff(req))
   if (!detail) {
@@ -43,7 +43,7 @@ export const checkout = async (req: Request, res: Response) => {
   }
 }
 
-export const updateStatus = async (req: Request, res: Response) => {
+export const updateStatus = async (req: Request<{ id: string }>, res: Response) => {
   if (!req.auth) return res.status(401).json({ message: "Unauthorized" })
   try {
     const input = statusSchema.parse(req.body)
