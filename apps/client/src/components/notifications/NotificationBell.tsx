@@ -1,5 +1,7 @@
+"use client"
+
 import { useQuery } from "@tanstack/react-query"
-import { Link } from "react-router-dom"
+import Link from "next/link"
 import { fetchNotifications } from "../../services/notifications"
 import { useAuth } from "../../types/auth-context"
 import { useNotificationStore } from "../../stores/notificationStore"
@@ -18,7 +20,7 @@ export const NotificationBell = () => {
   const unread = data?.filter((n) => !n.readAt).length ?? 0
 
   return (
-    <Link className="btn btn-outline-secondary btn-sm position-relative" to="/notifications" aria-label="Notifications">
+    <Link className="btn btn-outline-secondary btn-sm position-relative" href="/notifications" aria-label="Notifications">
       <span className="me-1">🔔</span>
       Inbox
       {unread > 0 && (

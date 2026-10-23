@@ -1,6 +1,6 @@
 # Backend contract (REST + Socket.IO)
 
-Base URL defaults to `http://localhost:3001`. The Vite client uses `VITE_API_URL` and `VITE_SOCKET_URL` (same origin by default).
+Base URL defaults to `http://localhost:3001`. The Next.js client uses `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SOCKET_URL` (same origin by default).
 
 ## Auth
 

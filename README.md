@@ -1,6 +1,6 @@
 # Jewellery e-commerce (full stack)
 
-Monorepo: **React (Vite) client**, **Express + TypeScript API**, **PostgreSQL** (Docker or local), with **Socket.IO** for order/notification hints.
+Monorepo: **Next.js client**, **Express + TypeScript API**, **PostgreSQL** (Docker or local), with **Socket.IO** for order/notification hints.
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@ Copy [.env.example](.env.example) to `apps/api/.env` and set at minimum:
 - `JWT_ACCESS_SECRET`
 - `JWT_REFRESH_SECRET`
 
-Optional: `apps/client/.env.development` (see [.env.example](.env.example) for `VITE_*` defaults).
+Optional: `apps/client/.env.development` (see [.env.example](.env.example) for `NEXT_PUBLIC_*` defaults).
 
 ### 3) Database
 
@@ -56,7 +56,7 @@ pnpm dev
 ```
 
 - API + Socket.IO: `http://localhost:3001`
-- Client: `http://localhost:5173`
+- Client (Next.js): `http://localhost:3000`
 
 ## Default admin
 
@@ -84,13 +84,13 @@ See [docs/qa-checklist.md](docs/qa-checklist.md).
 - **Docker not running** — start Docker Desktop before `docker compose up -d`.
 - **`role "postgres" does not exist`** — use Docker Postgres or adjust `DATABASE_URL` to your local role.
 - **JWT errors** — ensure `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` are set in `apps/api/.env`.
-- **CORS / API URL** — set `VITE_API_URL` to the API origin if not using localhost:3001.
+- **CORS / API URL** — set `NEXT_PUBLIC_API_URL` to the API origin if not using localhost:3001.
 
 ## Packages
 
 | Package | Description |
 |---------|-------------|
-| `apps/client` | Vite + React storefront & admin UI |
+| `apps/client` | Next.js (App Router) storefront & admin UI |
 | `apps/api` | Express API + Socket.IO |
 | `packages/types` | Shared TypeScript types |
 | `db` | SQL migrations + seed script |

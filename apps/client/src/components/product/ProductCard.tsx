@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import Link from "next/link"
 import type { Product } from "@jewellery/types"
 import { deriveDisplayBadge } from "../../utils/productBadges"
 import { BadgePill } from "./BadgePill"
@@ -8,12 +8,12 @@ export const ProductCard = ({ product }: { product: Product }) => {
   const thumb = product.images[0]?.url ?? "https://placehold.co/400x400?text=Jewellery"
   return (
     <div className="card h-100 border-0 shadow-sm overflow-hidden">
-      <Link to={`/products/${product.id}`} className="ratio ratio-1x1 bg-body-secondary">
+      <Link href={`/products/${product.id}`} className="ratio ratio-1x1 bg-body-secondary">
         <img src={thumb} alt="" className="object-fit-cover w-100 h-100" />
       </Link>
       <div className="card-body d-flex flex-column">
         <div className="d-flex justify-content-between align-items-start gap-2 mb-2">
-          <Link to={`/products/${product.id}`} className="text-decoration-none text-body fw-semibold">
+          <Link href={`/products/${product.id}`} className="text-decoration-none text-body fw-semibold">
             {product.name}
           </Link>
           {badge && <BadgePill badge={badge} />}
