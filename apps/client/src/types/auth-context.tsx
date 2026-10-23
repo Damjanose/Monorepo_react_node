@@ -1,4 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react"
+"use client"
+
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 import type { AuthResponse, LoginInput, RegisterInput, User } from "@jewellery/types"
 import { apiClient } from "../api/client"
 import { useAuthStore } from "../stores/authStore"
@@ -19,7 +21,8 @@ const REFRESH_KEY = "template_refresh_token"
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
-  const [refreshToken, setRefreshToken] = useState<string | null>(() => localStorage.getItem(REFRESH_KEY))
+  const [refreshToken, setRefreshToken] = useState<string | null>(null)
+  const bootstrapped = useRef(false)
 
   useEffect(() => {
     const reqId = apiClient.interceptors.request.use((config) => {
@@ -33,14 +36,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [accessToken])
 
   useEffect(() => {
-    if (!refreshToken) {
+    // Refresh tokens rotate, so a second (StrictMode) run would invalidate the first.
+    if (bootstrapped.current) return
+    bootstrapped.current = true
+
+    // Read on mount: localStorage is unavailable during server rendering.
+    const storedRefreshToken = localStorage.getItem(REFRESH_KEY)
+    if (!storedRefreshToken) {
       useAuthStore.getState().setSessionReady(true)
       return
     }
 
     const bootstrap = async () => {
       try {
-        const { data } = await apiClient.post<AuthResponse>("/auth/refresh", { refreshToken })
+        const { data } = await apiClient.post<AuthResponse>("/auth/refresh", { refreshToken: storedRefreshToken })
         setUser(data.user)
         setAccessToken(data.tokens.accessToken)
         setRefreshToken(data.tokens.refreshToken)

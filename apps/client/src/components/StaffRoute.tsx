@@ -1,21 +1,28 @@
-import { Navigate } from "react-router-dom"
+"use client"
+
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { useAuthStore } from "../stores/authStore"
 import { useAuth } from "../types/auth-context"
 
 export const StaffRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth()
-
-  if (!user) {
-    return <Navigate to="/login" replace />
-  }
+  const sessionReady = useAuthStore((s) => s.sessionReady)
+  const router = useRouter()
 
   const ok =
-    user.permissions.includes("admin") ||
-    user.permissions.includes("product.write") ||
-    user.permissions.includes("order.write")
+    !!user &&
+    (user.permissions.includes("admin") ||
+      user.permissions.includes("product.write") ||
+      user.permissions.includes("order.write"))
 
-  if (!ok) {
-    return <Navigate to="/" replace />
-  }
+  useEffect(() => {
+    if (!sessionReady) return
+    if (!user) router.replace("/login")
+    else if (!ok) router.replace("/")
+  }, [sessionReady, user, ok, router])
+
+  if (!ok) return null
 
   return <>{children}</>
 }

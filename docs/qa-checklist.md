@@ -50,4 +50,4 @@ Run with Docker Postgres (`docker compose up -d`), `.env` in `apps/api/`, then `
 
 ## Env
 
-- [ ] `VITE_API_URL` / `VITE_SOCKET_URL` override defaults when set.
+- [ ] `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_SOCKET_URL` override defaults when set (they are inlined at build time, so rebuild after changing).
